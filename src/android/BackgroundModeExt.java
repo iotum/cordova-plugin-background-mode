@@ -145,17 +145,11 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     private void moveToForeground()
     {
-        Activity  app = getApp();
-        Intent intent = getLaunchIntent();
-
-        intent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
-                Intent.FLAG_ACTIVITY_SINGLE_TOP |
-                Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Context context = cordova.getActivity();
+        Intent intent = makeMainActivityIntent(context, false, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
         clearScreenAndKeyguardFlags();
-        app.startActivity(intent);
+        context.getApplicationContext().startActivity(intent);
     }
 
     /**
