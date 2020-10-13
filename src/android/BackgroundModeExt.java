@@ -147,7 +147,9 @@ public class BackgroundModeExt extends CordovaPlugin {
     private void moveToForeground()
     {
         Intent notificationIntent = new Intent(cordova.getActivity(), cordova.getActivity().getClass());
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent pendingIntent = PendingIntent.getActivity(cordova.getActivity(), 0, notificationIntent, 0);
         try 
         {
