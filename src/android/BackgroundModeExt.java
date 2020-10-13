@@ -30,8 +30,6 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -147,42 +145,17 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     private void moveToForeground()
     {
-        Context context = cordova.getActivity();
-        Intent intent = makeMainActivityIntent(context, false, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-
-        clearScreenAndKeyguardFlags();
-        context.getApplicationContext().startActivity(intent);
-    }
-
-    private static Intent makeMainActivityIntent(Context context, boolean fromLauncher, int flags) {
-        ComponentName foregroundActivityComponent = findMainActivityComponentName(context);
-        Intent ret = new Intent();
-        ret.setComponent(foregroundActivityComponent);
-        ret.setFlags(flags);
-        if (fromLauncher) {
-            ret.setAction(Intent.ACTION_MAIN);
-            ret.addCategory(Intent.CATEGORY_LAUNCHER);
-        } else {
-            ret.addCategory(Intent.CATEGORY_DEFAULT);
+        Intent notificationIntent = new Intent(cordova.getActivity(), cordova.getActivity().getClass());
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(cordova.getActivity(), 0, notificationIntent, 0);
+        try 
+        {
+            pendingIntent.send();
         }
-        return ret;
-    }
-
-    private static ComponentName findMainActivityComponentName(Context context) {
-        PackageManager pm = context.getPackageManager();
-        PackageInfo packageInfo = null;
-        try {
-            packageInfo = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException("No package info for " + context.getPackageName(), e);
+        catch (PendingIntent.CanceledException e) 
+        {
+            e.printStackTrace();
         }
-
-        for (ActivityInfo activityInfo : packageInfo.activities) {
-            if ((activityInfo.flags & ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS) == 0) {
-                return new ComponentName(packageInfo.packageName, activityInfo.name);
-            }
-        }
-        throw new RuntimeException("Could not find main activity");
     }
 
     /**
