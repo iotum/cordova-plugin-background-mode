@@ -152,6 +152,37 @@ public class BackgroundModeExt extends CordovaPlugin {
         context.getApplicationContext().startActivity(intent);
     }
 
+    private static Intent makeMainActivityIntent(Context context, boolean fromLauncher, int flags) {
+        ComponentName foregroundActivityComponent = findMainActivityComponentName(context);
+        Intent ret = new Intent();
+        ret.setComponent(foregroundActivityComponent);
+        ret.setFlags(flags);
+        if (fromLauncher) {
+            ret.setAction(Intent.ACTION_MAIN);
+            ret.addCategory(Intent.CATEGORY_LAUNCHER);
+        } else {
+            ret.addCategory(Intent.CATEGORY_DEFAULT);
+        }
+        return ret;
+    }
+
+    private static ComponentName findMainActivityComponentName(Context context) {
+        PackageManager pm = context.getPackageManager();
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException("No package info for " + context.getPackageName(), e);
+        }
+
+        for (ActivityInfo activityInfo : packageInfo.activities) {
+            if ((activityInfo.flags & ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS) == 0) {
+                return new ComponentName(packageInfo.packageName, activityInfo.name);
+            }
+        }
+        throw new RuntimeException("Could not find main activity");
+    }
+
     /**
      * Enable GPS position tracking while in background.
      */
