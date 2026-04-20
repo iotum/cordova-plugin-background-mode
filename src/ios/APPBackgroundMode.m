@@ -139,9 +139,6 @@ NSString* const kAPPBackgroundEventDeactivate = @"deactivate";
     }
 
     [audioPlayer pause];
-
-    AVAudioSession* session = [AVAudioSession sharedInstance];
-    [session setActive:NO error:NULL];
 }
 
 /**
